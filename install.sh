@@ -10,7 +10,6 @@ sudo apt-get install python3-pyqt5 python3-pdfkit
 
 # Téléchargement de l'application et des ressources
 sudo mkdir -p /opt/cuisine
-sudo cp logo.svg script.py icon.png /opt/cuisine/
 sudo wget https://raw.githubusercontent.com/Lycee-Experimental/cuisine-LXP/main/logo.svg -O /opt/cuisine/logo.svg
 sudo wget https://raw.githubusercontent.com/Lycee-Experimental/cuisine-LXP/main/icon.png -O /opt/cuisine/icon.png
 sudo chmod 644 /opt/cuisine/icon.png
