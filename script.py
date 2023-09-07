@@ -100,6 +100,9 @@ td:nth-child(2) {{
   text-align: center; /* centrer le contenu de la deuxième colonne */
   padding: 0 30px; /* ajouter de la marge à gauche et à droite des cellules */
 }}
+p {{
+text-align: center;
+}}
 .logo {{
   position: absolute;
   top: 50px;
@@ -148,7 +151,16 @@ td:nth-child(2) {{
     <td>{:.2f} €</td>
   </tr>
 </table> 
-
+<p>
+<strong>COLLER</strong> le (ou les) ticket de caisse ci-dessous.
+</p>
+<p>
+Vous pouvez le couper pour qu'il tienne sur la page, mais <strong>TOUTES LES PARTIES</strong> doivent être collées.
+</p>
+<hr>
+<p>
+<strong>TICKETS DE CAISSE</strong>
+</p>
         </body>
         </html>
         """.format(abs_path, datetime.strptime(date_str, '%Y-%m-%d').strftime("%A %d %B %Y"),x, y, result, value)
@@ -174,7 +186,19 @@ td:nth-child(2) {{
             cursor.execute('SELECT float2 FROM my_table ORDER BY date DESC LIMIT 1')
             # Fetch the result
             diff = cursor.fetchone()[0]
-        value = float(self.input_value.text().replace(",", "."))
+        try:
+            value = float(self.input_value.text().replace(",", "."))
+        except:
+            # Créer une instance de QMessageBox
+            msg_box = QMessageBox()
+            # Définir le type de l'avertissement
+            msg_box.setIcon(QMessageBox.Warning)
+            # Définir le titre de la boîte de dialogue
+            msg_box.setWindowTitle("Attention !")
+            # Définir le texte du message
+            msg_box.setText("Veuillez renseigner le montant des courses de la journée.")
+            # Afficher la boîte de dialogue
+            msg_box.exec_()
         value_rect=value-diff
         date_str=self.date_edit.date().toString("yyyy-MM-dd")
         a = 2.5
@@ -291,14 +315,16 @@ th {{background-color: #f2f2f2;
   border: 1px solid black;
   padding: 8px;}}
 
-table tfoot tr:first-child td:nth-child(-n+4) {{
-  border: none;
-}}
-table tfoot tr:last-child td:nth-last-child(-n+2) {{
+table tfoot {{
   background-color: #f2f2f2;
   border: 1px solid black;
   padding: 8px;
-    font-weight: bold;
+}}
+table tfoot tr:first-child {{
+  font-weight: bold;
+}}
+table tfoot tr:last-child {{
+  font-weight: bold;
 }}
 
             </style>
@@ -320,9 +346,17 @@ table tfoot tr:last-child td:nth-last-child(-n+2) {{
   </thead>
   <tbody>""".format(abs_path, start_date.strftime('%d %B %Y') , end_date.strftime('%d %B %Y'))
         tot=0
+        complet=0
+        simple=0
+        recettes=0
+        depenses=0
         for row in sorted(result, key=lambda x: x[0]):
             date=datetime.strptime(row[0], '%Y-%m-%d').strftime('%A %d %B %Y')
+            complet+=row[1]
+            simple+=row[2]
+            depenses+=row[3]
             percu=row[1]*2.5+row[2]*1.6
+            recettes+=percu
             diff=percu-row[3]
             tot+=diff
             html+="""
@@ -338,14 +372,14 @@ table tfoot tr:last-child td:nth-last-child(-n+2) {{
         html+="""</tbody>
           <tfoot>
         <tr>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
     <td>Total</td>
+    <td>{}</td>
+    <td>{}</td>
+    <td>{:.2f} €</td>
+    <td>{:.2f} €</td>
     <td>{:.2f} €</td>
   </tr>
-  </tfoot>""".format(tot)
+  </tfoot>""".format(complet,simple,recettes,depenses,tot)
         
         html+="""
               </table>
